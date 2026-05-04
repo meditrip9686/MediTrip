@@ -60,9 +60,12 @@ import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 import AdminPatientsPage from './pages/admin/AdminPatientsPage';
 import { AdminRoute } from './components/common/ProtectedRoute';
 
+import LoadingScreen from './components/common/LoadingScreen';
+
 function App() {
   return (
     <Router>
+      <LoadingScreen />
       <Routes>
         {/* Admin Secret Login */}
         <Route path="/1234/admin/login" element={<AdminLoginPage />} />
