@@ -1,0 +1,1656 @@
+================================================================================
+                    MEDITRIP — FULL STACK APPLICATION PRD
+              Web + Mobile (React + Vite + Capacitor + Supabase)
+                      Version 2.0 | Production Ready
+================================================================================
+
+PROJECT OVERVIEW
+  App Name      : MediTrip
+  Type          : Web Application + Android Native App (via Capacitor)
+  Frontend      : React + Vite + TypeScript
+  Mobile        : Capacitor (Android APK from same codebase)
+  Backend       : Supabase (PostgreSQL + Auth + Storage + Realtime)
+  Hosting       : Vercel (web) + Capacitor build (Android APK)
+  Payments      : Demo / Mock (Phase 1)
+  Colors        : Sky Blue (#0EA5E9) + White (#FFFFFF) + Black (#0F172A)
+  Admin URL     : yourdomain.com/1234/admin
+  Admin Setup   : First-time creation only, fixed email + password after that
+
+
+================================================================================
+SECTION 1 — APPLICATION ARCHITECTURE
+================================================================================
+
+HOW THE CODEBASE WORKS
+  - One single React + Vite codebase
+  - Runs as a web app on Vercel
+  - Same code is wrapped by Capacitor to produce Android APK
+  - Supabase handles everything backend: database, auth, file storage, realtime
+  - No separate backend server needed
+  - All API calls go directly from React to Supabase
+
+FOLDER STRUCTURE
+  /src
+    /pages          All route-based page components
+    /components     Reusable UI components
+    /layouts        Page layouts (PublicLayout, DashboardLayout, AdminLayout)
+    /hooks          Custom React hooks (useAuth, useBooking, useSupabase)
+    /store          Zustand global state (auth, booking wizard, cart)
+    /lib            Supabase client, utility functions
+    /i18n           Translation files (EN, BN, HI)
+    /types          TypeScript interfaces and types
+  /android          Capacitor Android project (auto-generated)
+  /public           Static assets
+  capacitor.config.ts
+  vite.config.ts
+  vercel.json
+
+RESPONSIVE DESIGN TARGETS
+  Mobile  : 375px – 767px   (Android via Capacitor, mobile browsers)
+  Tablet  : 768px – 1023px  (iPad, tablet browsers)
+  Desktop : 1024px+         (Web, Vercel hosted)
+
+  Every page must look and work correctly on all three sizes.
+  Capacitor wraps the exact same web UI into the Android app.
+  No separate mobile codebase. One build, two platforms.
+
+
+================================================================================
+SECTION 2 — COLOR SYSTEM & DESIGN LANGUAGE
+================================================================================
+
+PRIMARY COLORS
+  Sky Blue  : #0EA5E9   (buttons, links, active states, icons, CTAs)
+  White     : #FFFFFF   (backgrounds, cards, panels)
+  Black     : #0F172A   (text, headers, navbar)
+
+SUPPORTING COLORS (derived, not custom)
+  Light Blue BG    : #F0F9FF   (section backgrounds, input focus rings)
+  Medium Blue      : #38BDF8   (hover states on sky blue elements)
+  Dark Blue        : #0369A1   (pressed/active button state)
+  Gray Text        : #64748B   (body copy, descriptions, labels)
+  Light Gray       : #F8FAFC   (table rows, alternating bg)
+  Border Gray      : #E2E8F0   (card borders, dividers, input borders)
+  Success Green    : #10B981   (confirmed booking, success badges)
+  Warning Amber    : #F59E0B   (pending status, alerts)
+  Danger Red       : #EF4444   (cancelled, error, delete actions)
+
+TYPOGRAPHY
+  Font Family      : Inter (Google Fonts — load via @import)
+  Heading Large    : 32px / Bold / #0F172A
+  Heading Medium   : 24px / SemiBold / #0F172A
+  Heading Small    : 18px / SemiBold / #0F172A
+  Body             : 16px / Regular / #64748B
+  Small / Caption  : 14px / Regular / #94A3B8
+  Button Text      : 15px / SemiBold / #FFFFFF or #0EA5E9
+
+COMPONENT DESIGN RULES
+  Border Radius    : 12px for cards, 8px for buttons, 6px for inputs
+  Shadow (cards)   : 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(14,165,233,0.06)
+  Button Primary   : bg #0EA5E9, text white, hover bg #38BDF8
+  Button Secondary : bg white, text #0EA5E9, border 1.5px solid #0EA5E9
+  Button Danger    : bg #EF4444, text white
+  Input            : border #E2E8F0, focus ring #0EA5E9, radius 8px, padding 12px 16px
+  Navbar           : bg #0F172A, logo + links in white, active link in #0EA5E9
+  Footer           : bg #0F172A, text white, links in #94A3B8
+  Card             : bg white, border #E2E8F0, radius 12px, padding 24px
+
+ADMIN PANEL DESIGN (intentionally minimal)
+  Bg               : #F8FAFC (very light gray)
+  Sidebar          : #0F172A (dark, compact)
+  Table rows       : alternating white and #F8FAFC
+  Buttons          : standard blue / red only
+  No illustrations, no gradients, no animations
+  Goal: functional, fast to load, easy to read
+
+
+================================================================================
+SECTION 3 — ALL PAGES, PURPOSE & UI DESIGN
+================================================================================
+
+Every page below includes:
+  PURPOSE     — what the page does and why it exists
+  SECTIONS    — what content areas appear on the page
+  KEY UI      — specific UI components and design notes
+  MOBILE      — how it adapts on small screens
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 1 — HOME / LANDING PAGE
+Route: /
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  The first page every visitor sees. Its only job is to make the visitor
+  understand what MediTrip does in under 10 seconds and give them a clear
+  next action. This page must convert visitors into users.
+
+SECTIONS
+
+  1. NAVBAR
+     Logo (left) + nav links (center) + Login/Signup buttons (right)
+     On scroll: navbar sticks to top with white shadow
+     Mobile: hamburger menu, full screen slide-in nav
+
+  2. HERO SECTION
+     Large heading: "Affordable Medical Care in India — Trusted by Thousands"
+     Sub-heading: "Compare verified hospitals, book treatment packages,
+     and travel with full support. No middlemen. No surprises."
+     Search bar: Treatment name (dropdown) + Country (dropdown) + Find Now button
+     Background: sky blue gradient, no image (keeps it fast on mobile)
+     Trust badges below search: "10,000+ Patients Served"
+     "50+ Verified Hospitals" "NABH & JCI Certified Partners"
+
+  3. HOW IT WORKS
+     3 numbered steps in horizontal cards:
+     Step 1: Search Treatment → Step 2: Choose Hospital & Package →
+     Step 3: Travel & Get Treated
+     Icon per step, short 1-line description
+
+  4. FEATURED TREATMENTS
+     Horizontal scroll row of treatment cards (mobile) / 4-column grid (desktop)
+     Each card: treatment icon, name, avg cost in INR and USD, "View" button
+     Treatments shown: Knee Replacement, Heart Bypass, IVF, Dental Implants,
+     Cosmetic Surgery, Spine Surgery, Eye Surgery, Cancer Treatment
+
+  5. COST COMPARISON TABLE
+     India vs USA vs UK side-by-side for top 5 treatments
+     Sky blue highlight on India column to show savings
+     Caption: "Save 60–80% without compromising on quality"
+
+  6. TOP HOSPITALS
+     3–4 hospital cards showing: logo, city, accreditation badge, rating stars,
+     top specialties, "View Hospital" button
+
+  7. PATIENT TESTIMONIALS
+     3 testimonial cards: patient photo placeholder, name, country, treatment,
+     star rating, quote text
+
+  8. SOURCE COUNTRIES BANNER
+     Map of Asia/Africa with highlighted source countries
+     Or a simple flag row: Bangladesh, Bhutan, Nigeria, Iraq, Oman, Kenya, etc.
+
+  9. FINAL CTA SECTION
+     Heading: "Ready to Start Your Medical Journey?"
+     Two buttons: "Browse Treatments" and "Talk to Us on WhatsApp"
+     Background: sky blue solid
+
+  10. FOOTER
+      Logo, tagline, nav links (Treatments, Hospitals, Doctors, Blog, Contact)
+      Social links, copyright, Privacy Policy, Terms of Service
+
+KEY UI
+  Hero search bar is the most prominent element — large, centered, sky blue button
+  Trust badges must be visible without scrolling on desktop
+  Treatment cards are horizontally scrollable on mobile (no horizontal scroll bar)
+
+MOBILE NOTES
+  Hero heading shrinks to 26px
+  Search bar stacks vertically (treatment select, country select, button each full width)
+  How It Works goes vertical (3 stacked cards)
+  Cost table horizontally scrollable
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 2 — BROWSE TREATMENTS
+Route: /treatments
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Lets patients find the specific medical procedure they need.
+  The filter system helps narrow down by category, cost, and city so patients
+  land on the right treatment detail page.
+
+SECTIONS
+
+  1. PAGE HEADER
+     Title: "Medical Treatments in India"
+     Sub: "Compare procedures, costs, and hospitals"
+
+  2. FILTER BAR (sticky on desktop, collapsible on mobile)
+     Category dropdown: All | Orthopedic | Cardiac | Cosmetic | IVF |
+     Dental | Neuro | Oncology | Eye
+     Price range slider: ₹0 – ₹10,00,000
+     City: All | Delhi | Mumbai | Bangalore | Chennai | Hyderabad
+     Sort by: Popularity | Lowest Cost | Highest Rated
+
+  3. TREATMENT GRID
+     3-column grid (desktop), 2-column (tablet), 1-column (mobile)
+     Each treatment card:
+       - Category icon (sky blue)
+       - Treatment name (bold)
+       - Short description (2 lines)
+       - Avg cost: "₹3,20,000 – ₹4,50,000 / $3,800 – $5,400"
+       - Number of partner hospitals offering it
+       - Success rate percentage
+       - "View Details" button (sky blue outline)
+
+  4. LOAD MORE BUTTON
+     Loads next 12 treatments. No pagination numbers needed.
+
+KEY UI
+  Filter bar collapses into a "Filter" button on mobile that opens a bottom drawer
+  Active filters shown as removable tags below the filter bar
+  Empty state: "No treatments found. Try adjusting filters." with reset button
+
+MOBILE NOTES
+  Filter as bottom drawer sheet
+  Cards go full width, stacked
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 3 — TREATMENT DETAIL
+Route: /treatments/:slug
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Gives the patient full information about one specific procedure so they
+  feel confident and informed before choosing a hospital or booking.
+  The page ends with a clear booking CTA.
+
+SECTIONS
+
+  1. BREADCRUMB
+     Home > Treatments > Knee Replacement
+
+  2. TREATMENT OVERVIEW
+     Left column (60%): Name, category badge, description (3–5 paragraphs)
+     Right column (40%): Cost card
+       - "Average Cost in India"
+       - INR and USD range
+       - vs USA cost (with savings %)
+       - "Book This Treatment" button (sky blue, sticky on scroll mobile)
+
+  3. WHAT'S INCLUDED
+     Bullet list: Surgeon fees, hospital stay, anaesthesia, post-op care,
+     1 follow-up consultation
+
+  4. RECOVERY TIMELINE
+     Visual horizontal timeline: Day 1 (Surgery) → Day 3–5 (Hospital) →
+     Day 7–10 (Discharge) → Week 4 (Review) → Month 3 (Full Recovery)
+
+  5. TOP HOSPITALS FOR THIS TREATMENT
+     3 hospital cards with: name, city, rating, accreditation, cost at
+     that hospital, "View Hospital" and "Book Here" buttons
+
+  6. SUCCESS STATISTICS
+     3 stat boxes: Success Rate %, Avg Hospital Stay (days),
+     Patients Treated via MediTrip
+
+  7. FAQ ACCORDION
+     5–8 common questions about this specific treatment
+     Click to expand/collapse each answer
+
+  8. BOOK CTA BANNER
+     Full-width sky blue section:
+     "Ready to book your Knee Replacement? Our team will guide you."
+     Button: "Start Booking" → /book/step-1?treatment=knee-replacement
+
+KEY UI
+  Right column cost card is sticky on desktop while user scrolls the left column
+  Recovery timeline uses sky blue dots and connecting line
+  Book CTA banner always visible at bottom of page
+
+MOBILE NOTES
+  Two columns collapse to single column
+  Cost card moves below description
+  Sticky "Book Now" button at very bottom of screen (fixed footer bar)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 4 — BROWSE HOSPITALS
+Route: /hospitals
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Lets patients browse all verified partner hospitals on MediTrip.
+  Filters help narrow by city, specialty, and accreditation so patients
+  can find the right hospital for their needs.
+
+SECTIONS
+
+  1. PAGE HEADER
+     Title: "Verified Partner Hospitals in India"
+     Sub: "All hospitals are NABH or JCI accredited"
+
+  2. VIEW TOGGLE
+     List View / Map View toggle buttons (top right)
+
+  3. FILTER BAR
+     City: All | Delhi | Mumbai | Bangalore | Chennai | Hyderabad | Kolkata
+     Specialty: All | Orthopedic | Cardiac | IVF | Oncology | Cosmetic | Neuro
+     Accreditation: All | NABH | JCI | Both
+     Min Rating: 3+ | 4+ | 4.5+
+
+  4a. LIST VIEW — HOSPITAL CARDS
+     2-column grid (desktop), 1-column (mobile)
+     Each card:
+       - Hospital name (bold, 18px)
+       - City + state
+       - Accreditation badges (NABH / JCI chips)
+       - Star rating + review count
+       - Top 3 specialties as tags
+       - Key stat: "150+ International Patients Served"
+       - Two buttons: "View Profile" | "Compare"
+       (Compare adds hospital to a compare tray, max 3 hospitals)
+
+  4b. MAP VIEW
+     Google Maps embed covering full content area
+     Each hospital = blue pin marker
+     Click pin = popup card with name, rating, "View" button
+     Sidebar shows filtered list alongside map
+
+  5. COMPARE TRAY (appears at bottom when 2+ hospitals selected)
+     Fixed bar at bottom: shows selected hospital names + "Compare Now" button
+     Goes to /compare
+
+KEY UI
+  Accreditation badges are sky blue chips, not plain text
+  Compare tray slides up from bottom when first hospital is selected
+  Map view pins use MediTrip logo as custom marker
+
+MOBILE NOTES
+  Map view hides sidebar, full screen map with floating filter button
+  List view is single column
+  Compare tray is compact (names hidden, just count + button)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 5 — HOSPITAL PROFILE
+Route: /hospitals/:id
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  The most detailed page about a single hospital. A patient should be able to
+  read this page and decide with confidence whether to book treatment here.
+  Every trust-building detail goes on this page.
+
+SECTIONS
+
+  1. HOSPITAL HEADER
+     Hospital name (large, bold)
+     City, state, address
+     Accreditation badges row (NABH, JCI)
+     Star rating + "X reviews" link
+     Two primary buttons: "Book Treatment Here" | "Add to Compare"
+
+  2. PHOTO GALLERY
+     Large featured image (hospital building / operation theatre / rooms)
+     Row of 4 thumbnails below
+     Click any thumbnail to open full-screen lightbox
+
+  3. ABOUT THE HOSPITAL
+     3–5 paragraph description
+     Key highlights as icon + text rows:
+       Year established, Number of beds, Number of specialties,
+       International patients served, Languages spoken by staff
+
+  4. ACCREDITATIONS & CERTIFICATIONS
+     Badges with names: NABH, JCI, ISO 9001, etc.
+     Short 1-line note on what each accreditation means
+
+  5. SPECIALTIES & TREATMENTS OFFERED
+     Grid of specialty cards (icon + name)
+     Each specialty links to /treatments filtered by that specialty
+
+  6. DOCTORS AT THIS HOSPITAL
+     Horizontal scroll row of doctor cards:
+       Photo, name, specialty, languages, years experience
+       "View Doctor" button on each
+
+  7. TREATMENT PRICING TABLE
+     Table: Treatment | Avg Cost INR | Avg Cost USD | Stay Duration
+     Top 5–8 treatments at this hospital
+     Footer note: "Final prices confirmed after consultation"
+
+  8. LOCATION MAP
+     Google Maps embed with hospital pin
+     Address text below map
+     "Get Directions" link opens Google Maps
+
+  9. PATIENT REVIEWS
+     Overall rating (big number + stars)
+     Rating breakdown: 5★ 4★ 3★ 2★ 1★ (bar chart style)
+     List of reviews: photo, name, country, treatment, date, star rating, comment
+     Show 5 reviews, "Load More" button
+
+  10. BOOK CTA BANNER
+      Sky blue full-width section
+      "Book your treatment at [Hospital Name]"
+      "Start Booking" button → booking flow with hospital pre-selected
+
+KEY UI
+  Photo gallery lightbox on image click
+  Rating breakdown bars are sky blue filled bars
+  Pricing table has alternating row colors
+  Sticky "Book Treatment" button on mobile (fixed bottom bar)
+
+MOBILE NOTES
+  Gallery goes full width, swipeable
+  Doctors row is swipeable carousel
+  Map is full width, reduced height
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 6 — BROWSE DOCTORS
+Route: /doctors
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Patients who want to choose their specific doctor first (before hospital)
+  come here. Trust is built by showing credentials, language capability,
+  and real patient reviews.
+
+SECTIONS
+
+  1. PAGE HEADER
+     "Find Your Doctor in India"
+     Search bar: search by name or specialty
+
+  2. FILTERS
+     Specialty, Language Spoken, City, Min Rating, Hospital
+
+  3. DOCTOR GRID
+     3-col (desktop), 2-col (tablet), 1-col (mobile)
+     Each card:
+       - Circular photo
+       - Name (bold) + degree abbreviations
+       - Specialty badge (sky blue)
+       - Hospital name (link)
+       - Languages: flag icons
+       - Experience: "22 years"
+       - Rating + review count
+       - "View Profile" button
+
+KEY UI
+  Flag icons for languages spoken (not text)
+  Specialty badge is a sky blue rounded chip
+  Photo is circular, 80x80px on card
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 7 — DOCTOR PROFILE
+Route: /doctors/:id
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Full profile of one doctor. Patients need to trust this person with their
+  health. The page must feel like a verified, professional medical bio — not
+  a generic listing.
+
+SECTIONS
+
+  1. DOCTOR HEADER
+     Large circular photo (120px)
+     Name, specialty, degree
+     Hospital name (linked)
+     Languages spoken (flag + text)
+     Star rating + review count
+     "Book with Dr. [Name]" button (sky blue)
+
+  2. ABOUT THE DOCTOR
+     Biography paragraph (3–5 lines)
+     Education & qualifications list
+     Years of experience
+     Number of surgeries performed
+     Success rate %
+
+  3. PROCEDURES PERFORMED
+     Chips/tags: all procedures this doctor handles
+     Click chip → goes to /treatments/:slug
+
+  4. PATIENT REVIEWS
+     Same design as hospital reviews section
+     Name, country, treatment, rating, comment
+
+  5. BOOK CTA
+     "Book a consultation or treatment with Dr. [Name]"
+     "Start Booking" button
+
+KEY UI
+  Doctor photo has a sky blue ring around it
+  Qualification list uses checkmark icons in sky blue
+  Procedure chips are outlined, turn filled on hover
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 8 — COMPARE
+Route: /compare
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Patients who shortlisted 2–3 hospitals use this page to make a final
+  decision. The side-by-side format removes the need to switch between tabs
+  and remember details.
+
+SECTIONS
+
+  1. COMPARISON TABLE
+     Rows: Hospital Name | City | Accreditation | Rating | Top Specialties |
+     Languages | Knee Replacement Cost | Cardiac Cost | Patient Volume |
+     "Book" button
+     Columns: up to 3 hospitals
+     Best value cell highlighted in light sky blue
+
+  2. REMOVE HOSPITAL
+     X button on each column header to remove that hospital
+
+  3. ADD ANOTHER HOSPITAL
+     If fewer than 3 selected: "Add Hospital" column with search box
+
+KEY UI
+  Green checkmark for features present, gray dash for absent
+  Lowest price in a row gets a "Best Price" badge
+  Horizontal scroll on mobile (fixed first column as label column)
+
+MOBILE NOTES
+  Table scrolls horizontally
+  First column (attribute names) is fixed/sticky
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 9 — BROWSE PACKAGES
+Route: /packages
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Patients who want an all-in-one deal (treatment + hotel + transfer + visa)
+  come here. Packages simplify the decision — one price, everything included.
+
+SECTIONS
+
+  1. PAGE HEADER
+     "Treatment Packages — Everything Included"
+     Filter: Treatment type, Hospital, Price range, Inclusions (hotel, visa, etc.)
+
+  2. PACKAGE CARDS
+     2-col (desktop), 1-col (mobile)
+     Each card:
+       - Package name (e.g. "Knee Replacement — Premium Package")
+       - Hospital name + city
+       - Treatment included
+       - Inclusions row: icons for Hotel, Transfer, Translator, Visa
+         (sky blue if included, gray if not)
+       - Duration: "12–15 days"
+       - Price: "₹4,80,000" (big bold) + "~$5,760 USD"
+       - "View Package" button
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 10 — PACKAGE DETAIL
+Route: /packages/:id
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Full breakdown of one package so the patient knows exactly what they are
+  paying for before clicking Book. Eliminates hidden-cost surprises.
+
+SECTIONS
+
+  1. PACKAGE HEADER
+     Name, hospital (linked), treatment
+     Total price (large) in INR and USD
+     "Book This Package" button (sky blue, prominent)
+
+  2. WHAT'S INCLUDED
+     Checklist with icons:
+       ✓ Treatment + surgeon fees
+       ✓ X nights hospital stay
+       ✓ 4-star hotel (X nights)
+       ✓ Airport pickup and drop
+       ✓ Dedicated translator
+       ✓ Visa assistance
+       ✓ 1 post-treatment teleconsultation
+     Each item: icon (green check or gray dash), label, short note
+
+  3. TIMELINE
+     Day-by-day breakdown:
+     Day 1: Arrive, airport pickup, hotel check-in
+     Day 2: Pre-op consultation at hospital
+     Day 3: Surgery
+     Day 4–6: Hospital recovery
+     Day 7–10: Hotel recovery
+     Day 11: Final check-up
+     Day 12: Departure
+
+  4. HOSPITAL SUMMARY
+     Small card: hospital name, city, accreditation, rating, "View Hospital"
+
+  5. PRICE BREAKDOWN TABLE
+     Row by row: Surgery | Hospital Stay | Hotel | Transfer | Translator | Visa
+     Each with INR cost, total at bottom
+
+  6. BOOK CTA
+     "Book This Package" → /book/step-1?package=:id
+
+KEY UI
+  Price breakdown table has a totals row in sky blue background
+  Timeline uses vertical line with dots (like a stepper)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 11 — BOOKING FLOW (6 Steps)
+Routes: /book/step-1 through /book/step-6 and /book/confirmation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Guides the patient from intent to confirmed booking through 6 clear steps.
+  State is saved in Zustand so browser refresh or back navigation doesn't
+  lose data. Patient must be logged in; if not, redirect to /login with
+  returnTo=/book/step-1.
+
+SHARED HEADER (all steps)
+  Progress bar at top: 6 segments, current step filled sky blue
+  Step label: "Step 2 of 6 — Choose Hospital & Doctor"
+  "Save & Continue Later" link (saves to Supabase bookings as draft)
+
+─────────────────────────────────────
+STEP 1 — Select Treatment & Dates
+Route: /book/step-1
+─────────────────────────────────────
+PURPOSE: Capture what the patient needs and when they want to travel.
+
+FIELDS
+  Treatment (dropdown — searchable)
+  Preferred travel month (month picker, not exact date)
+  Flexibility: Exact dates / Flexible ± 2 weeks / Not sure yet
+  Country coming from (dropdown)
+  Number of companions travelling (0 / 1 / 2+)
+
+UI
+  Large, clean form — one field per row
+  Treatment dropdown has category grouping (Orthopedic, Cardiac, etc.)
+  "Next" button at bottom right, disabled until Treatment is selected
+
+─────────────────────────────────────
+STEP 2 — Choose Hospital & Doctor
+Route: /book/step-2
+─────────────────────────────────────
+PURPOSE: Patient selects which hospital and doctor they want.
+Shows only hospitals that offer the selected treatment.
+
+LAYOUT
+  Left panel (60%): List of matching hospitals
+    Each hospital card: name, city, rating, accreditation, cost at this hospital
+    "Select" radio button
+  Right panel (40%): Once hospital selected, shows doctors at that hospital
+    Doctor cards: photo, name, specialty, rating, "Select" radio
+
+  On mobile: hospital list first, doctor list appears below after selection
+
+VALIDATION
+  Cannot proceed without selecting both hospital and doctor
+
+─────────────────────────────────────
+STEP 3 — Package & Add-ons
+Route: /book/step-3
+─────────────────────────────────────
+PURPOSE: Patient customizes their package with optional extras.
+Running cost total updates in real time as they toggle items.
+
+FIELDS
+  Base: Treatment only (pre-selected, cannot deselect)
+  Toggle: Hotel (select tier: 3-star / 4-star / 5-star)
+  Toggle: Airport Transfer (₹X,XXX)
+  Toggle: Dedicated Translator (₹X,XXX)
+  Toggle: Visa Assistance (₹X,XXX)
+
+COST SUMMARY (sticky right panel desktop / bottom sheet mobile)
+  Line-by-line cost as items are toggled
+  Grand total (large, bold, sky blue)
+
+─────────────────────────────────────
+STEP 4 — Patient Details
+Route: /book/step-4
+─────────────────────────────────────
+PURPOSE: Collect the personal and medical info the hospital needs to
+prepare for the patient's arrival.
+
+FIELDS
+  Full name
+  Date of birth
+  Gender
+  Nationality
+  Passport number
+  Passport expiry date
+  Medical summary (textarea: "Briefly describe your condition")
+  File upload: Attach medical reports (PDF/JPG/PNG, max 20MB)
+  Emergency contact name
+  Emergency contact phone
+  Language preference (EN / BN / HI)
+
+UI
+  Two-column form on desktop, single column on mobile
+  File upload: drag-and-drop box with file type and size labels
+  All fields validated before Next is enabled
+
+─────────────────────────────────────
+STEP 5 — Review & Confirm
+Route: /book/step-5
+─────────────────────────────────────
+PURPOSE: Patient reviews every selection before paying. Last chance to
+edit anything. No surprises on the payment page.
+
+SECTIONS
+  Treatment selected (with edit link → step 1)
+  Hospital + Doctor selected (with edit link → step 2)
+  Package and add-ons (with edit link → step 3)
+  Patient details summary (with edit link → step 4)
+  Full cost breakdown table
+  Grand total (large, sky blue)
+
+  Checkbox: "I confirm the details above are correct"
+  "Proceed to Payment" button (disabled until checkbox ticked)
+
+─────────────────────────────────────
+STEP 6 — Demo Payment
+Route: /book/step-6
+─────────────────────────────────────
+PURPOSE: Simulate a payment experience. No real money. Patient gets
+a realistic payment screen so they understand the final flow.
+
+UI
+  Prominent yellow banner at top:
+  "⚠ DEMO MODE — This is a test payment. No real money will be charged."
+
+  Card input section:
+    Cardholder name
+    Card number (masked input, any number accepted)
+    Expiry date (MM/YY)
+    CVV
+
+  Amount shown: Grand total in INR and USD
+  "Pay Now" button (sky blue)
+
+BEHAVIOR
+  Any card ending in 1111 → 2 second spinner → SUCCESS
+  Any card ending in 0000 → 2 second spinner → FAILED (red error, retry)
+  All other card numbers → SUCCESS
+  On success: booking record written to Supabase, status = confirmed
+  Confirmation email sent via Supabase Edge Function + Resend
+
+─────────────────────────────────────
+BOOKING CONFIRMATION
+Route: /book/confirmation
+─────────────────────────────────────
+PURPOSE: Patient knows their booking is real and what happens next.
+Relieves post-payment anxiety with clear next steps.
+
+SECTIONS
+  Large green checkmark icon
+  "Booking Confirmed!"
+  Booking ID: MED-2025-XXXXX
+  Summary: treatment, hospital, doctor, dates
+  "Your Patient Concierge": name, photo, WhatsApp number
+  Next Steps checklist:
+    ✓ Check your email for confirmation
+    □ Upload any remaining medical documents
+    □ Apply for Indian visa (link to visa guide)
+    □ Book your flight
+    □ Your concierge will call you within 24 hours
+  Download calendar invite (.ics) button
+  "Go to My Dashboard" button
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 12 — SIGN UP
+Route: /signup
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Create a new patient account. Simple and fast — only essential fields.
+  More details are collected in the booking flow when they are needed.
+
+SECTIONS
+  Logo centered at top
+  Heading: "Create Your MediTrip Account"
+  Fields: Full Name | Email | Password | Country (dropdown)
+  Sign Up button (sky blue, full width)
+  "Already have an account? Login" link
+  OR divider + "Continue with Google" button (Supabase OAuth)
+
+  After signup: OTP email sent via Supabase Auth
+  User lands on OTP verification screen, then redirected to /dashboard
+
+KEY UI
+  Single centered card, max 440px wide
+  Password field has show/hide toggle
+  Form validation inline (red border + message on blur)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 13 — LOGIN
+Route: /login
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Returning users sign in. Also entry point after a "returnTo" redirect
+  from protected pages like the booking flow.
+
+SECTIONS
+  Logo + "Welcome Back"
+  Email + Password fields
+  "Forgot Password?" link (right-aligned)
+  Login button (sky blue)
+  "Don't have an account? Sign Up" link
+  OR + "Continue with Google"
+
+  On success: redirect to returnTo param or /dashboard
+  On fail: inline error below password field
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 14 — PATIENT DASHBOARD HOME
+Route: /dashboard
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Patient's personal home base. Shows everything relevant to their medical
+  journey at a glance. Designed to reduce the number of taps needed to
+  find information.
+
+LAYOUT
+  Sidebar navigation (desktop): Dashboard | Bookings | Documents |
+  Messages | Payments | Reviews | Aftercare | Profile | Logout
+  Mobile: Bottom tab bar with icons (5 main tabs) + "More" tab
+
+SECTIONS
+
+  1. WELCOME BAR
+     "Welcome back, [Name]" + country flag
+     Language toggle: EN / BN / HI (saves to profile)
+
+  2. SUMMARY CARDS ROW
+     Active Bookings (count + status badge)
+     Unread Messages (count, red dot if any)
+     Pending Documents (count)
+     Upcoming Travel Date (date or "None")
+
+  3. ACTIVE BOOKING CARD (if exists)
+     Full card: treatment, hospital, doctor, travel date, status badge,
+     "View Booking" button, "Message Concierge" button
+
+  4. RECOMMENDED PACKAGES
+     3 package cards based on browsing history or country-popular treatments
+     "Browse All Packages" link
+
+  5. QUICK ACTIONS
+     Upload Document | Message Concierge | Browse Treatments | WhatsApp Support
+
+KEY UI
+  Summary cards in a 2x2 grid on mobile, 4-in-a-row on desktop
+  Active booking card is the most prominent item after welcome bar
+  Sidebar highlights current active section
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 15 — MY BOOKINGS
+Route: /dashboard/bookings
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Shows all bookings (active, past, cancelled) in one place.
+  Patient can track status and take actions on each booking.
+
+SECTIONS
+  Tab filter: All | Active | Completed | Cancelled
+  Booking list (cards):
+    Booking ID, treatment, hospital, doctor, travel dates
+    Status badge: Pending (amber) | Confirmed (sky blue) |
+    In Progress (blue) | Completed (green) | Cancelled (red)
+    "View Details" button
+    "Message Concierge" button (only if confirmed or in-progress)
+    "Cancel Booking" button (only if pending or confirmed)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 16 — BOOKING DETAIL
+Route: /dashboard/bookings/:id
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Everything about one specific booking. The patient's single source of
+  truth for that medical trip.
+
+SECTIONS
+  Booking ID + status badge
+  Treatment, hospital, doctor (each linked)
+  Travel dates, package inclusions
+  Concierge info: photo, name, WhatsApp link
+  Cost breakdown + payment status
+  Documents uploaded for this booking
+  "Message Concierge" button
+  "Download Receipt" button (PDF)
+  "Cancel Booking" button (if cancellable)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 17 — MEDICAL DOCUMENTS
+Route: /dashboard/documents
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Patients upload medical reports, prescriptions, and identity documents
+  securely. Only the patient and their assigned concierge can see these files.
+
+SECTIONS
+  Upload zone: drag-and-drop or click to browse
+  Accepted: PDF, JPG, PNG. Max 20MB per file. 200MB total.
+  Uploaded files list: name, type, size, upload date, booking linked,
+  Download and Delete buttons
+  Storage usage bar: "18 MB of 200 MB used"
+
+KEY UI
+  Upload zone is dashed border, sky blue on drag-over
+  File type icons (PDF red, JPG blue, PNG green)
+  Delete shows confirmation dialog before removing
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 18 — MESSAGES / CHAT
+Route: /dashboard/messages
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Real-time communication between patient and their assigned concierge.
+  Each booking has its own chat channel. This replaces the need for
+  WhatsApp for important communications that should be on record.
+
+SECTIONS
+  Left panel: list of booking-based chat threads
+  Each thread: booking ID, concierge name, last message preview, time, unread count
+  Right panel: active chat
+    Messages: sender avatar, name, time, message content
+    Incoming: left-aligned (gray bubble)
+    Outgoing: right-aligned (sky blue bubble)
+    "Mark as Urgent" flag button → email alert to admin
+    File attachment (links to document in Supabase Storage)
+    Message input + Send button
+
+KEY UI
+  Unread count shown as red badge on thread list
+  Urgent messages shown with red border and ⚠ icon
+  Typing indicator ("Concierge is typing...")
+  WhatsApp fallback link: "Continue on WhatsApp" at top of chat
+
+MOBILE
+  List panel and chat panel are separate screens
+  Back arrow to go from chat to thread list
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 19 — PAYMENT HISTORY
+Route: /dashboard/payments
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Record of all demo payments made. Patient can download receipts for
+  their own records.
+
+SECTIONS
+  Table: Date | Booking ID | Amount INR | Amount USD | Status | Receipt
+  Status: Success (green) | Failed (red) | Pending (amber)
+  Receipt column: "Download PDF" link
+  Note at top: "All transactions are demo payments. No real money was charged."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 20 — AFTERCARE & FOLLOW-UP
+Route: /dashboard/aftercare
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Keeps the patient engaged and supported after they return home.
+  Post-treatment care is a major trust-builder and differentiator.
+
+SECTIONS
+  Post-treatment checklist (treatment-specific): tick off completed steps
+  Medication reminders (name, dose, time — entered by concierge)
+  Teleconsultation schedule (Phase 2: video call booking)
+  Recovery progress (simple: "Week 1 of 12 recovery weeks")
+  Write a Review (prompt appears 7 days post-discharge)
+
+KEY UI
+  Checklist items tick with animation (green checkmark fills in)
+  Review prompt is a card with star selector and text area
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 21 — MY PROFILE
+Route: /dashboard/profile
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE
+  Patient updates their personal info, passport details, and preferences.
+  Also where they can delete their account (GDPR compliance).
+
+SECTIONS
+  Profile photo upload
+  Personal info: name, email (read-only), phone, DOB, gender, nationality
+  Passport: number, expiry date
+  Language preference: EN / BN / HI toggle
+  Emergency contact: name + phone
+  Change password section
+  "Delete My Account" link (confirmation dialog → soft delete in Supabase)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGES 22–28 — HOSPITAL PARTNER DASHBOARD
+Route prefix: /partner/
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE OF PARTNER DASHBOARD
+  Hospital admins manage their MediTrip presence and handle incoming
+  patient bookings. This is a B2B tool — functional over flashy.
+
+/partner/dashboard
+  Summary: Total bookings this month, pending confirmations, revenue (demo),
+  patient count by country (bar chart)
+
+/partner/profile
+  Edit: hospital name, description, city, contact info, specialties,
+  accreditations, gallery image upload (up to 10 images)
+
+/partner/doctors
+  Table of doctors linked to this hospital
+  Add doctor: name, specialty, photo, languages, qualifications, bio
+  Edit/delete existing doctors
+
+/partner/bookings
+  Table: Booking ID | Patient Country | Treatment | Doctor | Travel Dates |
+  Status | Actions
+  Actions: Confirm | Reject (with notes field) | View Details
+  Status filter: Pending | Confirmed | In Progress | Completed | Cancelled
+
+/partner/packages
+  Table of packages created by this hospital
+  Create/edit package: title, treatment, inclusions toggles, hotel tier,
+  price INR, duration days, availability toggle
+
+/partner/messages
+  Same chat UI as patient but from hospital side
+  Shows all patient chats linked to their hospital's bookings
+
+/partner/analytics
+  Monthly bookings trend (line chart)
+  Patient country breakdown (pie chart or bar chart)
+  Top treatments booked
+  Conversion: views → bookings rate
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGES 29–38 — ADMIN PANEL
+Route prefix: /1234/admin/
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PURPOSE OF ADMIN PANEL
+  Internal tool for MediTrip team (Avaneesh / Abhishek) to run the platform.
+  Basic UI only. No unnecessary design. Functional, readable tables and forms.
+
+ADMIN SETUP (first time only)
+  Visit /1234/admin/setup
+  Create admin email + password
+  This page becomes inaccessible after first admin is created
+  Admin credentials stored in Supabase auth with role = admin
+  No self-registration for admin — fixed after setup
+
+ADMIN LOGIN
+  Route: /1234/admin/login
+  Email + Password only
+  No "Forgot Password" on this page — password is fixed
+  On wrong credentials: "Invalid admin credentials"
+
+─────────────────────────────────────
+ADMIN LAYOUT
+─────────────────────────────────────
+  Left sidebar (dark #0F172A, 220px wide):
+    MediTrip Admin (logo + label)
+    Nav links: Dashboard | Users | Hospitals | Doctors | Bookings |
+    Packages | Payments | Blog | Support | Settings | Logout
+  Top bar: current page title + admin email display
+  Content area: white/light gray background
+
+─────────────────────────────────────
+/1234/admin/dashboard — Analytics Overview
+─────────────────────────────────────
+PURPOSE: Single screen showing the health of the entire platform.
+
+METRICS CARDS ROW
+  Total Users | Total Hospitals | Total Bookings |
+  Revenue This Month (demo) | Active Bookings | Pending Approvals
+
+CHARTS
+  Line chart: Bookings per month (last 6 months)
+  Bar chart: Bookings by source country
+  Pie chart: Bookings by treatment type
+  Table: Last 10 bookings (ID, patient, hospital, status, date)
+
+CHARTS LIBRARY: Recharts (lightweight, works with React)
+
+─────────────────────────────────────
+/1234/admin/users — User Management
+─────────────────────────────────────
+PURPOSE: View and manage all registered patients.
+
+TABLE COLUMNS
+  ID | Name | Email | Country | Role | Joined Date | Status | Actions
+
+ACTIONS
+  View: opens side panel with full profile details
+  Edit: inline edit or modal — name, country, role, status
+  Suspend: sets status = suspended (user cannot login)
+  Delete: confirmation dialog → hard delete from Supabase
+  Search: by name or email
+  Filter: by country, role, status, join date range
+
+─────────────────────────────────────
+/1234/admin/hospitals — Hospital Management
+─────────────────────────────────────
+PURPOSE: Approve partner hospitals and manage their listings.
+
+TABLE COLUMNS
+  ID | Hospital Name | City | Status | Accreditation | Rating | Joined | Actions
+
+STATUS VALUES
+  Pending → Approved → Suspended
+  Admin can move between any status
+
+ACTIONS
+  Approve: changes status to approved, hospital becomes publicly visible
+  Reject: changes status to rejected with a reason note
+  Suspend: hides from public listing
+  Edit: edit any hospital field directly
+  Delete: removes hospital and all linked doctors/packages
+
+─────────────────────────────────────
+/1234/admin/doctors — Doctor Verification
+─────────────────────────────────────
+TABLE COLUMNS
+  ID | Name | Specialty | Hospital | Status | Added Date | Actions
+
+ACTIONS
+  Verify: marks doctor as verified (gets verified badge on public profile)
+  Unverify | Edit | Delete
+
+─────────────────────────────────────
+/1234/admin/bookings — All Bookings
+─────────────────────────────────────
+TABLE COLUMNS
+  Booking ID | Patient | Hospital | Treatment | Doctor | Status |
+  Travel Dates | Amount | Actions
+
+ACTIONS
+  View full booking details (side panel)
+  Change status manually (dropdown: any status)
+  Assign or reassign concierge
+  Add internal note (not visible to patient)
+  Download booking as PDF
+
+FILTERS
+  Status | Date range | Hospital | Treatment | Country
+
+─────────────────────────────────────
+/1234/admin/payments — Payment Log
+─────────────────────────────────────
+TABLE COLUMNS
+  Payment ID | Booking ID | Patient | Amount INR | Amount USD |
+  Status | Card Last 4 | Date
+
+Note at top: "All payments are demo transactions. No real money processed."
+Filter by: Status | Date range | Amount range
+
+─────────────────────────────────────
+/1234/admin/blog — Blog CMS
+─────────────────────────────────────
+PURPOSE: Manage blog content for SEO and patient education.
+
+TABLE: Title | Status | Author | Created | Actions (Edit, Publish, Delete)
+Create/Edit: Title | Slug (auto-generated) | Body (rich text) | 
+Featured Image | Tags | Status (Draft / Published)
+Rich text editor: use React-Quill (simple, no complex setup)
+
+─────────────────────────────────────
+/1234/admin/support — Support Tickets
+─────────────────────────────────────
+TABLE: Ticket ID | Patient | Booking ID | Issue | Status | Created | Actions
+
+STATUS: Open | In Progress | Resolved
+Admin can: Reply (via email trigger), Change status, Assign to self, Close
+
+─────────────────────────────────────
+/1234/admin/settings — Platform Settings
+─────────────────────────────────────
+Sections (simple form, save button at bottom):
+  Platform name (read-only: MediTrip)
+  Admin email (display only)
+  WhatsApp support number
+  Contact email displayed on contact page
+  Default currency display: INR + USD (both always shown)
+  Maintenance mode toggle (disables public site with a message page)
+  Demo payment mode: ON/OFF toggle (always ON for Phase 1)
+
+
+================================================================================
+SECTION 4 — PUBLIC INFORMATIONAL PAGES
+================================================================================
+
+/about
+  Mission, problem, solution, team bios (Avaneesh + Abhishek),
+  feasibility sections (Market, Technical, Economic, Legal)
+  No CTAs except one "Browse Treatments" at bottom
+
+/faq
+  Accordion list organized by category:
+  Before You Travel | During Treatment | Costs & Payment |
+  After Treatment | About MediTrip
+  30+ questions total
+
+/contact
+  Contact form: Name, Email, Country, Message → sends to admin via email
+  WhatsApp button (opens wa.me link)
+  Support email display
+  Office city: Hubli, Karnataka
+
+/blog
+  Grid of blog article cards
+  Filter by tag: Medical Tourism Tips | Destination Guides |
+  Patient Stories | Treatment Guides
+
+/blog/:slug
+  Full article with: title, author, date, tags, featured image, body
+  Related articles at bottom
+  Social share buttons (WhatsApp, Facebook, Twitter/X)
+
+/privacy
+  Standard privacy policy text
+  Sections: Data we collect, How we use it, Your rights, Contact
+
+/terms
+  Standard terms of service
+  Sections: Use of platform, Bookings, Payments (demo), Liability
+
+
+================================================================================
+SECTION 5 — SUPABASE BACKEND
+================================================================================
+
+TABLES (complete schema)
+
+profiles
+  id              uuid PK FK → auth.users.id
+  role            text  CHECK IN ('patient','hospital_admin','concierge','admin')
+  full_name       text
+  email           text
+  country         text
+  phone           text
+  language_pref   text  DEFAULT 'en'
+  dob             date
+  gender          text
+  nationality     text
+  passport_no     text
+  passport_expiry date
+  emergency_name  text
+  emergency_phone text
+  avatar_url      text
+  status          text  DEFAULT 'active' CHECK IN ('active','suspended','deleted')
+  created_at      timestamptz DEFAULT now()
+
+hospitals
+  id              uuid PK
+  name            text NOT NULL
+  city            text
+  state           text
+  address         text
+  description     text
+  accreditations  text[]
+  specialties     text[]
+  rating          numeric DEFAULT 0
+  review_count    int DEFAULT 0
+  images          text[]
+  partner_status  text DEFAULT 'pending' CHECK IN ('pending','approved','suspended','rejected')
+  admin_id        uuid FK → profiles.id
+  created_at      timestamptz
+
+doctors
+  id              uuid PK
+  hospital_id     uuid FK → hospitals.id
+  name            text
+  specialty       text
+  degree          text
+  bio             text
+  photo_url       text
+  languages       text[]
+  experience_yrs  int
+  success_rate    numeric
+  is_verified     bool DEFAULT false
+  created_at      timestamptz
+
+treatments
+  id              uuid PK
+  name            text
+  slug            text UNIQUE
+  description     text
+  category        text
+  avg_cost_min    numeric
+  avg_cost_max    numeric
+  recovery_days   int
+  success_rate    numeric
+  created_at      timestamptz
+
+packages
+  id              uuid PK
+  hospital_id     uuid FK → hospitals.id
+  treatment_id    uuid FK → treatments.id
+  title           text
+  hotel_included  bool DEFAULT false
+  hotel_tier      int
+  transfer        bool DEFAULT false
+  translator      bool DEFAULT false
+  visa_assistance bool DEFAULT false
+  price_inr       numeric
+  duration_days   int
+  is_available    bool DEFAULT true
+  created_at      timestamptz
+
+bookings
+  id              uuid PK
+  patient_id      uuid FK → profiles.id
+  package_id      uuid FK → packages.id
+  hospital_id     uuid FK → hospitals.id
+  doctor_id       uuid FK → doctors.id
+  treatment_id    uuid FK → treatments.id
+  concierge_id    uuid FK → profiles.id
+  status          text DEFAULT 'pending'
+                  CHECK IN ('draft','pending','confirmed',
+                  'in_progress','completed','cancelled')
+  travel_month    text
+  travel_flexible bool
+  companions      int DEFAULT 0
+  medical_summary text
+  admin_notes     text
+  total_amount    numeric
+  created_at      timestamptz
+
+payments
+  id              uuid PK
+  booking_id      uuid FK → bookings.id
+  amount_inr      numeric
+  amount_usd      numeric
+  status          text CHECK IN ('success','failed','pending')
+  demo_last4      text
+  created_at      timestamptz
+  NOTE: No real card data. Demo only.
+
+messages
+  id              uuid PK
+  booking_id      uuid FK → bookings.id
+  sender_id       uuid FK → profiles.id
+  content         text
+  is_urgent       bool DEFAULT false
+  attachment_url  text
+  created_at      timestamptz DEFAULT now()
+
+documents
+  id              uuid PK
+  patient_id      uuid FK → profiles.id
+  booking_id      uuid FK → bookings.id
+  file_path       text
+  file_name       text
+  file_type       text
+  file_size_kb    int
+  uploaded_at     timestamptz DEFAULT now()
+
+reviews
+  id              uuid PK
+  patient_id      uuid FK → profiles.id
+  hospital_id     uuid FK → hospitals.id
+  doctor_id       uuid FK → doctors.id
+  booking_id      uuid FK → bookings.id
+  rating          int CHECK (rating BETWEEN 1 AND 5)
+  comment         text
+  is_published    bool DEFAULT false
+  created_at      timestamptz
+
+blog_posts
+  id              uuid PK
+  title           text
+  slug            text UNIQUE
+  body            text
+  featured_image  text
+  tags            text[]
+  status          text CHECK IN ('draft','published')
+  author_id       uuid FK → profiles.id
+  published_at    timestamptz
+  created_at      timestamptz
+
+support_tickets
+  id              uuid PK
+  patient_id      uuid FK → profiles.id
+  booking_id      uuid FK → bookings.id
+  issue           text
+  status          text DEFAULT 'open' CHECK IN ('open','in_progress','resolved')
+  admin_reply     text
+  created_at      timestamptz
+
+ROW-LEVEL SECURITY POLICIES
+
+profiles       : SELECT/UPDATE own row; admin SELECT all
+hospitals      : SELECT approved (public); hospital_admin UPDATE own; admin ALL
+doctors        : SELECT all (public); hospital_admin INSERT/UPDATE for own hospital
+treatments     : SELECT all (public); admin INSERT/UPDATE/DELETE
+packages       : SELECT available (public); hospital_admin manage own; admin ALL
+bookings       : patient SELECT own; hospital_admin SELECT linked; admin ALL
+payments       : patient SELECT own; admin SELECT all
+messages       : participants of booking only (patient + concierge + hospital_admin)
+documents      : patient SELECT own; concierge SELECT if booking assigned; admin ALL
+reviews        : SELECT published (public); INSERT by patient with completed booking
+blog_posts     : SELECT published (public); admin ALL
+support_tickets: patient SELECT own; admin ALL
+
+SUPABASE STORAGE BUCKETS
+  patient-documents  : private, RLS — patient + assigned concierge only
+  hospital-images    : public read, hospital_admin write own
+  doctor-photos      : public read, hospital_admin write
+  blog-images        : public read, admin write
+  avatars            : public read, user write own
+
+
+================================================================================
+SECTION 6 — AUTH & ROLES
+================================================================================
+
+ROLES
+  patient         Default on signup
+  hospital_admin  Assigned by admin after hospital approval
+  concierge       Assigned by admin (internal MediTrip staff)
+  admin           Created once at /1234/admin/setup
+
+ROUTE PROTECTION RULES
+  /book/*              → patient only → else /login?returnTo=...
+  /dashboard/*         → patient only → else /login?returnTo=...
+  /partner/*           → hospital_admin only → else /unauthorized
+  /1234/admin/*        → admin only → else /1234/admin/login
+
+SUPABASE AUTH SETUP
+  Email/password: enabled
+  Google OAuth: enabled (optional for patients)
+  Email confirmation: enabled (OTP)
+  Session: JWT, 7-day expiry, auto-refresh
+  Admin password reset: manual (update via Supabase dashboard — not self-service)
+
+
+================================================================================
+SECTION 7 — CAPACITOR (ANDROID)
+================================================================================
+
+HOW IT WORKS
+  Same Vite + React codebase
+  Capacitor wraps the built web app into a WebView Android app
+  No separate mobile codebase needed
+
+SETUP STEPS (for developer)
+  1. npm install @capacitor/core @capacitor/cli @capacitor/android
+  2. npx cap init MediTrip com.meditrip.app
+  3. vite build (builds /dist)
+  4. npx cap add android
+  5. npx cap copy android
+  6. npx cap open android (opens Android Studio)
+  7. Build APK from Android Studio (Generate Signed APK)
+
+capacitor.config.ts
+  appId     : com.meditrip.app
+  appName   : MediTrip
+  webDir    : dist
+  server.androidScheme: https
+
+CAPACITOR PLUGINS TO INSTALL
+  @capacitor/camera         (patient profile photo upload)
+  @capacitor/filesystem     (local file access on Android)
+  @capacitor/push-notifications (Phase 2 — booking alerts)
+  @capacitor/share          (share hospital/package links)
+  @capacitor/haptics        (button tap feedback)
+  @capacitor/status-bar     (set status bar sky blue)
+
+MOBILE-SPECIFIC BEHAVIOR
+  Bottom tab navigation (not sidebar) on screens < 768px
+  Swipe gestures on galleries and carousels
+  File upload uses device camera or gallery picker
+  WhatsApp links open native app
+  All links to external pages open in in-app browser
+
+
+================================================================================
+SECTION 8 — VERCEL DEPLOYMENT
+================================================================================
+
+SETUP
+  Connect GitHub repo to Vercel
+  Framework preset: Vite
+  Build command: npm run build
+  Output directory: dist
+  Install command: npm install
+
+vercel.json
+  {
+    "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  }
+  (Required for React Router — all routes return index.html)
+
+ENVIRONMENT VARIABLES (set in Vercel dashboard)
+  VITE_SUPABASE_URL           your Supabase project URL
+  VITE_SUPABASE_ANON_KEY      your Supabase anon key
+  VITE_GOOGLE_MAPS_API_KEY    Google Maps Embed API key
+  VITE_APP_NAME               MediTrip
+  VITE_WHATSAPP_NUMBER        +91XXXXXXXXXX
+  VITE_CONTACT_EMAIL          support@meditrip.in
+
+DEPLOYMENT FLOW
+  Push to main branch → Vercel auto-deploys in ~60 seconds
+  Pull requests → Vercel creates preview URL automatically
+  Custom domain: add in Vercel project settings
+
+
+================================================================================
+SECTION 9 — KEY TECHNICAL DECISIONS
+================================================================================
+
+DECISION                   CHOICE                    REASON
+State management           Zustand                   Simple, no boilerplate,
+                                                     works well with Vite
+Form management            React Hook Form + Zod     Type-safe validation,
+                                                     minimal re-renders
+UI components              shadcn/ui + Tailwind CSS  Accessible, customizable,
+                                                     no style conflicts
+Charts (admin)             Recharts                  Lightweight, React-native,
+                                                     no jQuery dependency
+Rich text (blog)           React-Quill               Simple, no server needed
+Maps                       Google Maps Embed API     No SDK needed, just iframe,
+                                                     no billing complexity
+i18n                       i18next                   Industry standard,
+                                                     Vite plugin available
+Date handling              date-fns                  Lightweight, tree-shakeable
+HTTP client                Supabase JS SDK only      No Axios needed —
+                                                     Supabase handles all calls
+PDF generation             @react-pdf/renderer       Client-side receipts,
+                                                     no server needed
+Icons                      Lucide React              Consistent, tree-shakeable,
+                                                     used by shadcn/ui
+
+
+================================================================================
+SECTION 10 — NON-FUNCTIONAL REQUIREMENTS
+================================================================================
+
+PERFORMANCE
+  LCP < 2.5 seconds on 4G mobile
+  Route-based code splitting (Vite lazy imports)
+  Images: WebP format, lazy loading
+  Fonts: preloaded, subset only Latin + Devanagari + Bengali
+
+SECURITY
+  Supabase RLS on every single table — no exceptions
+  No secrets in frontend code (all via VITE_ env vars which are public,
+  but anon key is safe with RLS enforced)
+  File access via Supabase signed URLs (1-hour expiry)
+  Admin route at /1234/admin — obscure URL as first layer of protection
+  HTTPS enforced (Vercel default)
+
+ACCESSIBILITY
+  WCAG 2.1 AA minimum
+  All interactive elements keyboard-navigable
+  ARIA labels on icons and image-only buttons
+  Minimum 4.5:1 contrast ratio (sky blue on white passes)
+
+GDPR
+  Cookie consent banner on first visit
+  "Delete My Account" in patient profile (soft delete + data anonymization)
+  Privacy Policy and Terms pages linked in footer
+  No third-party analytics in Phase 1 (only Vercel Analytics, privacy-safe)
+
+SUPPORTED BROWSERS / OS
+  Web: Chrome 90+, Safari 14+, Firefox 88+, Edge 90+
+  Android: API 24+ (Android 7.0 Nougat and above) via Capacitor
+
+
+================================================================================
+SECTION 11 — ADMIN SETUP GUIDE
+================================================================================
+
+FIRST-TIME ADMIN CREATION
+  1. Deploy the application to Vercel
+  2. Visit: yourdomain.com/1234/admin/setup
+  3. Enter: Admin Email + Password (choose strong password)
+  4. Click "Create Admin Account"
+  5. Supabase creates user with role = admin
+  6. /1234/admin/setup becomes inaccessible (redirects to /1234/admin/login)
+  7. Login at: yourdomain.com/1234/admin/login
+
+ADMIN PASSWORD CHANGE
+  Not available in the app (by design — admin is fixed)
+  To change password: go to Supabase Dashboard → Authentication → Users
+  Find admin email → "Send Password Reset" or update directly in SQL editor
+
+ADDING CONCIERGE USERS
+  Admin creates account manually in Supabase Auth with role = concierge
+  Or: add a "Create Concierge" form in /1234/admin/settings (optional)
+
+
+================================================================================
+SECTION 12 — PAGE COUNT SUMMARY
+================================================================================
+
+PUBLIC PAGES          14 pages
+AUTH PAGES             4 pages
+PATIENT DASHBOARD      9 pages (including sub-pages)
+BOOKING FLOW           7 pages (6 steps + confirmation)
+PARTNER DASHBOARD      7 pages
+ADMIN PANEL           10 pages (including setup + login)
+─────────────────────────────────
+TOTAL                 51 pages / routes
+
+
+================================================================================
+                          END OF PRD
+                MediTrip — Full Stack Application Plan
+                   React + Vite + Capacitor + Supabase
+                     Vercel (Web) + Android (APK)
+================================================================================
