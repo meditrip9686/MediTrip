@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -153,10 +153,15 @@ export default function LoginPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <button type="button" className="btn-secondary !bg-white !py-4 justify-center !text-sm">
+              <button 
+                type="button" 
+                onClick={signInWithGoogle}
+                className="btn-secondary !bg-white !py-4 justify-center !text-sm gap-2"
+              >
+                <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="" />
                 Google
               </button>
-              <button type="button" className="btn-secondary !bg-white !py-4 justify-center !text-sm">
+              <button type="button" className="btn-secondary !bg-white !py-4 justify-center !text-sm gap-2">
                 Apple ID
               </button>
             </div>

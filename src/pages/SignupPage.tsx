@@ -23,7 +23,7 @@ export default function SignupPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signUp } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -184,6 +184,24 @@ export default function SignupPage() {
                 {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <>Join MediTrip <ArrowRight className="w-5 h-5 ml-2" /></>}
               </button>
             </div>
+
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase font-black tracking-widest">
+                <span className="bg-[#f8fafc] px-4 text-slate-400">Or continue with</span>
+              </div>
+            </div>
+
+            <button 
+              type="button" 
+              onClick={signInWithGoogle}
+              className="btn-secondary !w-full !bg-white !py-4 justify-center !text-sm gap-2"
+            >
+              <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="" />
+              Sign up with Google
+            </button>
           </form>
 
           <div className="mt-12 p-6 bg-white border border-slate-100 rounded-3xl flex items-start gap-4">

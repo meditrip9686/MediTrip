@@ -76,10 +76,14 @@ export default function ProfilePage() {
         {/* Avatar */}
         <div className="card flex items-center gap-5">
           <div className="relative">
-            <div className="w-20 h-20 bg-primary-200 rounded-full flex items-center justify-center">
-              <span className="text-primary-700 text-3xl font-bold">{profile?.full_name?.[0]?.toUpperCase() ?? 'U'}</span>
+            <div className="w-20 h-20 bg-primary-200 rounded-full flex items-center justify-center overflow-hidden border-4 border-white shadow-sm">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-primary-700 text-3xl font-bold">{profile?.full_name?.[0]?.toUpperCase() ?? 'U'}</span>
+              )}
             </div>
-            <button type="button" className="absolute -bottom-1 -right-1 w-7 h-7 bg-primary-500 rounded-full flex items-center justify-center text-white">
+            <button type="button" className="absolute -bottom-1 -right-1 w-7 h-7 bg-primary-500 rounded-full flex items-center justify-center text-white border-2 border-white">
               <Camera className="w-3.5 h-3.5" />
             </button>
           </div>

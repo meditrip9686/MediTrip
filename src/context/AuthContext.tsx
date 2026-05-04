@@ -78,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: user.id,
           email: user.email,
           full_name: user.user_metadata?.full_name || user.user_metadata?.name || 'New Patient',
+          avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
           country: user.user_metadata?.country || 'Unknown',
           role: 'patient',
         });
