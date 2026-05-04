@@ -197,7 +197,7 @@ export default function SignupPage() {
             <button 
               type="button" 
               onClick={signInWithGoogle}
-              className="btn-secondary !w-full !bg-white !py-4 justify-center !text-sm gap-2"
+              className="btn-secondary !w-full !bg-white !py-4 justify-center !text-sm gap-2 cursor-pointer"
             >
               <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="" />
               Sign up with Google

@@ -156,7 +156,7 @@ export default function LoginPage() {
               <button 
                 type="button" 
                 onClick={signInWithGoogle}
-                className="btn-secondary !bg-white !py-4 justify-center !text-sm gap-2"
+                className="btn-secondary !bg-white !py-4 justify-center !text-sm gap-2 cursor-pointer"
               >
                 <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="" />
                 Google
