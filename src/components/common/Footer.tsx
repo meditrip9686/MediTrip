@@ -14,8 +14,8 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="space-y-8">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/20">
-                <HeartPulse className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
+                <img src="/logo.png" alt="MediTrip Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-2xl font-extrabold text-white tracking-tight">
                 Medi<span className="text-primary-400">Trip</span>

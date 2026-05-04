@@ -49,8 +49,8 @@ export default function SignupPage() {
         
         <div className="relative z-10">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/20">
-              <HeartPulse className="w-7 h-7 text-white" />
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
+              <img src="/logo.png" alt="MediTrip Logo" className="w-full h-full object-cover" />
             </div>
             <span className="text-3xl font-extrabold text-white tracking-tight">
               Medi<span className="text-primary-400">Trip</span>

@@ -60,8 +60,8 @@ export default function AdminLayout() {
         <div className="h-full flex flex-col">
           <div className="p-6 flex items-center justify-between">
             <Link to="/admin" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
-                <Stethoscope className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                <img src="/logo.png" alt="MediTrip Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-xl font-bold tracking-tight">MediTrip <span className="text-primary-400 text-xs uppercase tracking-widest block font-medium opacity-70">Admin Panel</span></span>
             </Link>

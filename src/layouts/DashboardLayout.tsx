@@ -36,8 +36,8 @@ export default function DashboardLayout() {
           {/* Logo */}
           <div className="flex items-center justify-between p-5 border-b border-gray-800">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">M</span>
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                <img src="/logo.png" alt="MediTrip Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-white font-bold text-lg">MediTrip</span>
             </Link>

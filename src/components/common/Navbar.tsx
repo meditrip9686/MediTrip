@@ -51,12 +51,10 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-12">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 ${
-              scrolled ? 'bg-primary-600 shadow-lg shadow-primary-500/20' : 'bg-white shadow-xl shadow-black/5'
+            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 overflow-hidden ${
+              scrolled ? 'bg-primary-600' : 'bg-white'
             }`}>
-              <HeartPulse className={`w-6 h-6 transition-colors duration-300 ${
-                scrolled ? 'text-white' : 'text-primary-600'
-              }`} />
+              <img src="/logo.png" alt="MediTrip Logo" className="w-full h-full object-cover" />
             </div>
             <span className={`text-xl font-extrabold tracking-tight transition-colors duration-300 ${
               scrolled ? 'text-dark' : 'text-dark'
