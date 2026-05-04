@@ -47,7 +47,14 @@ export default function ReviewsPage() {
           .order('created_at', { ascending: false }),
       ]);
       setBookings(bData || []);
-      setReviews(rData || []);
+      setReviews((rData || []).map((r: any) => ({
+        ...r,
+        rating: r.rating ?? 0,
+        body: r.body ?? '',
+        treatment_name: r.treatment_name ?? 'Treatment',
+        created_at: r.created_at ?? new Date().toISOString(),
+        is_published: r.is_published ?? false
+      })));
       setIsLoading(false);
     }
     load();
@@ -73,7 +80,14 @@ export default function ReviewsPage() {
     setSubmitting(false);
     // Refresh
     const { data } = await supabase.from('reviews').select('*').eq('patient_id', user.id).order('created_at', { ascending: false });
-    setReviews(data || []);
+    setReviews((data || []).map((r: any) => ({
+      ...r,
+      rating: r.rating ?? 0,
+      body: r.body ?? '',
+      treatment_name: r.treatment_name ?? 'Treatment',
+      created_at: r.created_at ?? new Date().toISOString(),
+      is_published: r.is_published ?? false
+    })));
   };
 
   if (isLoading) return <div className="flex justify-center py-32"><Loader2 className="w-10 h-10 animate-spin text-primary-500" /></div>;
